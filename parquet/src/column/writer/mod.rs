@@ -75,6 +75,11 @@ impl<'a> ColumnWriter<'a> {
     /// Returns the estimated total bytes for this column writer
     #[cfg(feature = "arrow")]
     pub(crate) fn get_estimated_total_bytes(&self) -> u64 {
+        println!(
+            "MemoryReservation::actual_vs_reported, ColumnWriter, get_estimated_total_bytes(), {:?}, {:?}",
+            std::mem::size_of::<Self>(),
+            downcast_writer!(self, typed, typed.get_estimated_total_bytes())
+        );
         downcast_writer!(self, typed, typed.get_estimated_total_bytes())
     }
 
@@ -434,6 +439,13 @@ impl<'a, E: ColumnValueEncoder> GenericColumnWriter<'a, E> {
     /// of any data that has not yet been flushed to a page
     #[cfg(feature = "arrow")]
     pub(crate) fn get_estimated_total_bytes(&self) -> u64 {
+        println!(
+            "MemoryReservation::actual_vs_reported, GenericColumnWriter, get_estimated_total_bytes(), {:?}, {:?}",
+            std::mem::size_of::<Self>(),
+            self.column_metrics.total_bytes_written
+            + self.encoder.estimated_data_page_size() as u64
+            + self.encoder.estimated_dict_page_size().unwrap_or_default() as u64
+        );
         self.column_metrics.total_bytes_written
             + self.encoder.estimated_data_page_size() as u64
             + self.encoder.estimated_dict_page_size().unwrap_or_default() as u64
