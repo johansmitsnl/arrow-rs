@@ -453,7 +453,7 @@ impl<T: DataType> Encoder<T> for DeltaBitPackEncoder<T> {
     }
 
     fn estimated_data_encoded_size(&self) -> usize {
-        self.bit_writer.bytes_written()
+        self.bit_writer.bytes_written() + self.page_header_writer.bytes_written()
     }
 
     fn flush_buffer(&mut self) -> Result<Bytes> {
