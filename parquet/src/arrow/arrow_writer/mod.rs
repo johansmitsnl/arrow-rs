@@ -187,8 +187,10 @@ impl<W: Write + Send> ArrowWriter<W> {
 
     /// Returns the estimated memory usage of the current in progress row group.
     ///
-    /// This includes the current encoded size of written bytes, as well as
-    /// the size of the unencoded data not yet flushed.
+    /// This includes:
+    /// <already_written_encoded_byte_size> + <current_memory_size_of_unflushed_bytes> + <bytes_associated_with_processing>
+    ///
+    /// In the vast majority of cases our unflushed bytes are already encoded.
     pub fn memory_size(&self) -> usize {
         match &self.in_progress {
             Some(in_progress) => in_progress.writers.iter().map(|x| x.memory_size()).sum(),
@@ -198,8 +200,8 @@ impl<W: Write + Send> ArrowWriter<W> {
 
     /// Returns the estimated length in encoded bytes of the current in progress row group.
     ///
-    /// This includes an estimate of any data that has not yet been flushed to a page,
-    /// based on it's anticipated encoded size.
+    /// This includes:
+    /// <already_written_encoded_byte_size> + <estimated_encoded_size_of_unflushed_bytes>
     pub fn in_progress_size(&self) -> usize {
         match &self.in_progress {
             Some(in_progress) => in_progress
@@ -618,6 +620,11 @@ impl ArrowColumnWriter {
     ///
     /// Unlike [`Self::get_estimated_total_bytes`] this is an estimate
     /// of the current memory usage and not it's anticipated encoded size.
+    ///
+    /// This includes:
+    /// <already_written_encoded_byte_size> + <current_memory_size_of_unflushed_bytes> + <bytes_associated_with_processing>
+    ///
+    /// In the vast majority of cases our unflushed bytes are already encoded.
     pub fn memory_size(&self) -> usize {
         match &self.writer {
             ArrowColumnWriterImpl::ByteArray(c) => c.memory_size(),
@@ -627,8 +634,8 @@ impl ArrowColumnWriter {
 
     /// Returns the estimated total encoded bytes for this column writer.
     ///
-    /// This includes an estimate of any data that has not yet been flushed to a page,
-    /// based on it's anticipated encoded size.
+    /// This includes:
+    /// <already_written_encoded_byte_size> + <estimated_encoded_size_of_unflushed_bytes>
     pub fn get_estimated_total_bytes(&self) -> usize {
         match &self.writer {
             ArrowColumnWriterImpl::ByteArray(c) => c.get_estimated_total_bytes() as _,
