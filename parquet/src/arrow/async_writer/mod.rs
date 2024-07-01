@@ -127,7 +127,16 @@ impl<W: AsyncWrite + Unpin + Send> AsyncArrowWriter<W> {
         self.sync_writer.flushed_row_groups()
     }
 
-    /// Returns the estimated length in bytes of the current in progress row group
+    /// Estimated memory usage, in bytes, of this `ArrowWriter`
+    ///
+    /// See [ArrowWriter::memory_size] for more information.
+    pub fn memory_size(&self) -> usize {
+        self.sync_writer.memory_size()
+    }
+
+    /// Anticipated encoded size of the in progress row group.
+    ///
+    /// See [ArrowWriter::memory_size] for more information.
     pub fn in_progress_size(&self) -> usize {
         self.sync_writer.in_progress_size()
     }
