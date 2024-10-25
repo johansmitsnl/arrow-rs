@@ -38,7 +38,7 @@ pub struct BasicAuth {
     pub password: ::prost::alloc::string::String,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
-#[derive(Clone, Copy, PartialEq, ::prost::Message)]
+#[derive(Clone, PartialEq, ::prost::Message)]
 pub struct Empty {}
 ///
 /// Describes an available action, including both the name used for execution
@@ -103,7 +103,7 @@ pub struct Result {
 ///
 /// The result should be stored in Result.body.
 #[allow(clippy::derive_partial_eq_without_eq)]
-#[derive(Clone, Copy, PartialEq, ::prost::Message)]
+#[derive(Clone, PartialEq, ::prost::Message)]
 pub struct CancelFlightInfoResult {
     #[prost(enumeration = "CancelStatus", tag = "1")]
     pub status: i32,
@@ -464,8 +464,8 @@ pub mod flight_service_client {
     where
         T: tonic::client::GrpcService<tonic::body::BoxBody>,
         T::Error: Into<StdError>,
-        T::ResponseBody: Body<Data = Bytes> + std::marker::Send + 'static,
-        <T::ResponseBody as Body>::Error: Into<StdError> + std::marker::Send,
+        T::ResponseBody: Body<Data = Bytes> + Send + 'static,
+        <T::ResponseBody as Body>::Error: Into<StdError> + Send,
     {
         pub fn new(inner: T) -> Self {
             let inner = tonic::client::Grpc::new(inner);
@@ -490,7 +490,7 @@ pub mod flight_service_client {
             >,
             <T as tonic::codegen::Service<
                 http::Request<tonic::body::BoxBody>,
-            >>::Error: Into<StdError> + std::marker::Send + std::marker::Sync,
+            >>::Error: Into<StdError> + Send + Sync,
         {
             FlightServiceClient::new(InterceptedService::new(inner, interceptor))
         }
@@ -876,12 +876,12 @@ pub mod flight_service_server {
     use tonic::codegen::*;
     /// Generated trait containing gRPC methods that should be implemented for use with FlightServiceServer.
     #[async_trait]
-    pub trait FlightService: std::marker::Send + std::marker::Sync + 'static {
+    pub trait FlightService: Send + Sync + 'static {
         /// Server streaming response type for the Handshake method.
         type HandshakeStream: tonic::codegen::tokio_stream::Stream<
                 Item = std::result::Result<super::HandshakeResponse, tonic::Status>,
             >
-            + std::marker::Send
+            + Send
             + 'static;
         ///
         /// Handshake between client and server. Depending on the server, the
@@ -896,7 +896,7 @@ pub mod flight_service_server {
         type ListFlightsStream: tonic::codegen::tokio_stream::Stream<
                 Item = std::result::Result<super::FlightInfo, tonic::Status>,
             >
-            + std::marker::Send
+            + Send
             + 'static;
         ///
         /// Get a list of available streams given a particular criteria. Most flight
@@ -967,7 +967,7 @@ pub mod flight_service_server {
         type DoGetStream: tonic::codegen::tokio_stream::Stream<
                 Item = std::result::Result<super::FlightData, tonic::Status>,
             >
-            + std::marker::Send
+            + Send
             + 'static;
         ///
         /// Retrieve a single stream associated with a particular descriptor
@@ -982,7 +982,7 @@ pub mod flight_service_server {
         type DoPutStream: tonic::codegen::tokio_stream::Stream<
                 Item = std::result::Result<super::PutResult, tonic::Status>,
             >
-            + std::marker::Send
+            + Send
             + 'static;
         ///
         /// Push a stream to the flight service associated with a particular
@@ -999,7 +999,7 @@ pub mod flight_service_server {
         type DoExchangeStream: tonic::codegen::tokio_stream::Stream<
                 Item = std::result::Result<super::FlightData, tonic::Status>,
             >
-            + std::marker::Send
+            + Send
             + 'static;
         ///
         /// Open a bidirectional data channel for a given descriptor. This
@@ -1015,7 +1015,7 @@ pub mod flight_service_server {
         type DoActionStream: tonic::codegen::tokio_stream::Stream<
                 Item = std::result::Result<super::Result, tonic::Status>,
             >
-            + std::marker::Send
+            + Send
             + 'static;
         ///
         /// Flight services can support an arbitrary number of simple actions in
@@ -1032,7 +1032,7 @@ pub mod flight_service_server {
         type ListActionsStream: tonic::codegen::tokio_stream::Stream<
                 Item = std::result::Result<super::ActionType, tonic::Status>,
             >
-            + std::marker::Send
+            + Send
             + 'static;
         ///
         /// A flight service exposes all of the available action types that it has
@@ -1052,18 +1052,20 @@ pub mod flight_service_server {
     /// accessed using the Arrow Flight Protocol. Additionally, a flight service
     /// can expose a set of actions that are available.
     #[derive(Debug)]
-    pub struct FlightServiceServer<T> {
-        inner: Arc<T>,
+    pub struct FlightServiceServer<T: FlightService> {
+        inner: _Inner<T>,
         accept_compression_encodings: EnabledCompressionEncodings,
         send_compression_encodings: EnabledCompressionEncodings,
         max_decoding_message_size: Option<usize>,
         max_encoding_message_size: Option<usize>,
     }
-    impl<T> FlightServiceServer<T> {
+    struct _Inner<T>(Arc<T>);
+    impl<T: FlightService> FlightServiceServer<T> {
         pub fn new(inner: T) -> Self {
             Self::from_arc(Arc::new(inner))
         }
         pub fn from_arc(inner: Arc<T>) -> Self {
+            let inner = _Inner(inner);
             Self {
                 inner,
                 accept_compression_encodings: Default::default(),
@@ -1113,8 +1115,8 @@ pub mod flight_service_server {
     impl<T, B> tonic::codegen::Service<http::Request<B>> for FlightServiceServer<T>
     where
         T: FlightService,
-        B: Body + std::marker::Send + 'static,
-        B::Error: Into<StdError> + std::marker::Send + 'static,
+        B: Body + Send + 'static,
+        B::Error: Into<StdError> + Send + 'static,
     {
         type Response = http::Response<tonic::body::BoxBody>;
         type Error = std::convert::Infallible;
@@ -1126,6 +1128,7 @@ pub mod flight_service_server {
             Poll::Ready(Ok(()))
         }
         fn call(&mut self, req: http::Request<B>) -> Self::Future {
+            let inner = self.inner.clone();
             match req.uri().path() {
                 "/arrow.flight.protocol.FlightService/Handshake" => {
                     #[allow(non_camel_case_types)]
@@ -1159,6 +1162,7 @@ pub mod flight_service_server {
                     let max_encoding_message_size = self.max_encoding_message_size;
                     let inner = self.inner.clone();
                     let fut = async move {
+                        let inner = inner.0;
                         let method = HandshakeSvc(inner);
                         let codec = tonic::codec::ProstCodec::default();
                         let mut grpc = tonic::server::Grpc::new(codec)
@@ -1205,6 +1209,7 @@ pub mod flight_service_server {
                     let max_encoding_message_size = self.max_encoding_message_size;
                     let inner = self.inner.clone();
                     let fut = async move {
+                        let inner = inner.0;
                         let method = ListFlightsSvc(inner);
                         let codec = tonic::codec::ProstCodec::default();
                         let mut grpc = tonic::server::Grpc::new(codec)
@@ -1250,6 +1255,7 @@ pub mod flight_service_server {
                     let max_encoding_message_size = self.max_encoding_message_size;
                     let inner = self.inner.clone();
                     let fut = async move {
+                        let inner = inner.0;
                         let method = GetFlightInfoSvc(inner);
                         let codec = tonic::codec::ProstCodec::default();
                         let mut grpc = tonic::server::Grpc::new(codec)
@@ -1296,6 +1302,7 @@ pub mod flight_service_server {
                     let max_encoding_message_size = self.max_encoding_message_size;
                     let inner = self.inner.clone();
                     let fut = async move {
+                        let inner = inner.0;
                         let method = PollFlightInfoSvc(inner);
                         let codec = tonic::codec::ProstCodec::default();
                         let mut grpc = tonic::server::Grpc::new(codec)
@@ -1341,6 +1348,7 @@ pub mod flight_service_server {
                     let max_encoding_message_size = self.max_encoding_message_size;
                     let inner = self.inner.clone();
                     let fut = async move {
+                        let inner = inner.0;
                         let method = GetSchemaSvc(inner);
                         let codec = tonic::codec::ProstCodec::default();
                         let mut grpc = tonic::server::Grpc::new(codec)
@@ -1387,6 +1395,7 @@ pub mod flight_service_server {
                     let max_encoding_message_size = self.max_encoding_message_size;
                     let inner = self.inner.clone();
                     let fut = async move {
+                        let inner = inner.0;
                         let method = DoGetSvc(inner);
                         let codec = tonic::codec::ProstCodec::default();
                         let mut grpc = tonic::server::Grpc::new(codec)
@@ -1433,6 +1442,7 @@ pub mod flight_service_server {
                     let max_encoding_message_size = self.max_encoding_message_size;
                     let inner = self.inner.clone();
                     let fut = async move {
+                        let inner = inner.0;
                         let method = DoPutSvc(inner);
                         let codec = tonic::codec::ProstCodec::default();
                         let mut grpc = tonic::server::Grpc::new(codec)
@@ -1479,6 +1489,7 @@ pub mod flight_service_server {
                     let max_encoding_message_size = self.max_encoding_message_size;
                     let inner = self.inner.clone();
                     let fut = async move {
+                        let inner = inner.0;
                         let method = DoExchangeSvc(inner);
                         let codec = tonic::codec::ProstCodec::default();
                         let mut grpc = tonic::server::Grpc::new(codec)
@@ -1525,6 +1536,7 @@ pub mod flight_service_server {
                     let max_encoding_message_size = self.max_encoding_message_size;
                     let inner = self.inner.clone();
                     let fut = async move {
+                        let inner = inner.0;
                         let method = DoActionSvc(inner);
                         let codec = tonic::codec::ProstCodec::default();
                         let mut grpc = tonic::server::Grpc::new(codec)
@@ -1571,6 +1583,7 @@ pub mod flight_service_server {
                     let max_encoding_message_size = self.max_encoding_message_size;
                     let inner = self.inner.clone();
                     let fut = async move {
+                        let inner = inner.0;
                         let method = ListActionsSvc(inner);
                         let codec = tonic::codec::ProstCodec::default();
                         let mut grpc = tonic::server::Grpc::new(codec)
@@ -1592,11 +1605,8 @@ pub mod flight_service_server {
                         Ok(
                             http::Response::builder()
                                 .status(200)
-                                .header("grpc-status", tonic::Code::Unimplemented as i32)
-                                .header(
-                                    http::header::CONTENT_TYPE,
-                                    tonic::metadata::GRPC_CONTENT_TYPE,
-                                )
+                                .header("grpc-status", "12")
+                                .header("content-type", "application/grpc")
                                 .body(empty_body())
                                 .unwrap(),
                         )
@@ -1605,7 +1615,7 @@ pub mod flight_service_server {
             }
         }
     }
-    impl<T> Clone for FlightServiceServer<T> {
+    impl<T: FlightService> Clone for FlightServiceServer<T> {
         fn clone(&self) -> Self {
             let inner = self.inner.clone();
             Self {
@@ -1617,9 +1627,17 @@ pub mod flight_service_server {
             }
         }
     }
-    /// Generated gRPC service name
-    pub const SERVICE_NAME: &str = "arrow.flight.protocol.FlightService";
-    impl<T> tonic::server::NamedService for FlightServiceServer<T> {
-        const NAME: &'static str = SERVICE_NAME;
+    impl<T: FlightService> Clone for _Inner<T> {
+        fn clone(&self) -> Self {
+            Self(Arc::clone(&self.0))
+        }
+    }
+    impl<T: std::fmt::Debug> std::fmt::Debug for _Inner<T> {
+        fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+            write!(f, "{:?}", self.0)
+        }
+    }
+    impl<T: FlightService> tonic::server::NamedService for FlightServiceServer<T> {
+        const NAME: &'static str = "arrow.flight.protocol.FlightService";
     }
 }
