@@ -2559,6 +2559,7 @@ mod tests {
     }
 
     #[test]
+    #[allow(clippy::needless_borrows_for_generic_args)]
     fn test_decimal128_alignment16_is_sufficient() {
         const IPC_ALIGNMENT: usize = 16;
 
@@ -2618,6 +2619,7 @@ mod tests {
     }
 
     #[test]
+    #[allow(clippy::needless_borrows_for_generic_args)]
     fn test_decimal128_alignment8_is_unaligned() {
         const IPC_ALIGNMENT: usize = 8;
 
@@ -2675,6 +2677,7 @@ mod tests {
     }
 
     #[test]
+    #[allow(clippy::needless_borrows_for_generic_args)]
     fn test_flush() {
         // We write a schema which is small enough to fit into a buffer and not get flushed,
         // and then force the write with .flush().

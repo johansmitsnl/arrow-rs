@@ -387,6 +387,7 @@ impl UnionFields {
     {
         let fields = fields.into_iter().map(Into::into);
         let mut set = 0_u128;
+        #[allow(clippy::manual_inspect)]
         type_ids
             .into_iter()
             .map(|idx| {

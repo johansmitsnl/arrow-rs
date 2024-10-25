@@ -55,6 +55,7 @@ impl<'a, W: Write> ThriftMetadataWriter<'a, W> {
         // write offset index to the file
         for (row_group_idx, row_group) in self.row_groups.iter_mut().enumerate() {
             for (column_idx, column_metadata) in row_group.columns.iter_mut().enumerate() {
+                #[allow(clippy::single_match)]
                 match &offset_indexes[row_group_idx][column_idx] {
                     Some(offset_index) => {
                         let start_offset = self.buf.bytes_written();
@@ -84,6 +85,7 @@ impl<'a, W: Write> ThriftMetadataWriter<'a, W> {
         // write column index to the file
         for (row_group_idx, row_group) in self.row_groups.iter_mut().enumerate() {
             for (column_idx, column_metadata) in row_group.columns.iter_mut().enumerate() {
+                #[allow(clippy::single_match)]
                 match &column_indexes[row_group_idx][column_idx] {
                     Some(column_index) => {
                         let start_offset = self.buf.bytes_written();

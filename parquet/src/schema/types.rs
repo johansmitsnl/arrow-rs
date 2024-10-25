@@ -294,6 +294,7 @@ impl<'a> PrimitiveTypeBuilder<'a> {
             ));
         }
 
+        #[allow(clippy::single_match)]
         match &self.logical_type {
             Some(logical_type) => {
                 // If a converted type is populated, check that it is consistent with

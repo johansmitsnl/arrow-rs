@@ -402,6 +402,7 @@ fn sort_fixed_size_list(
     Ok(sort_impl(options, &mut valids, &null_indices, limit, Ord::cmp).into())
 }
 
+#[allow(clippy::needless_maybe_sized)]
 #[inline(never)]
 fn sort_impl<T: ?Sized + Copy>(
     options: SortOptions,

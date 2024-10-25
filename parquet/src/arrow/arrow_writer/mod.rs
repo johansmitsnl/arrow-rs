@@ -3034,6 +3034,7 @@ mod tests {
     }
 
     #[test]
+    #[allow(clippy::byte_char_slices)]
     fn test_disabled_statistics_with_page() {
         let file_schema = Schema::new(vec![
             Field::new("a", DataType::Utf8, true),
@@ -3106,6 +3107,7 @@ mod tests {
     }
 
     #[test]
+    #[allow(clippy::byte_char_slices)]
     fn test_disabled_statistics_with_chunk() {
         let file_schema = Schema::new(vec![
             Field::new("a", DataType::Utf8, true),

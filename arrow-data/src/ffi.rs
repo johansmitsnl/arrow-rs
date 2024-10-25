@@ -313,6 +313,7 @@ mod tests {
     // More tests located in top-level arrow crate
 
     #[test]
+    #[allow(unused_must_use)]
     fn null_array_n_buffers() {
         let data = ArrayData::new_null(&DataType::Null, 10);
 

@@ -1297,6 +1297,7 @@ mod tests {
     }
 
     #[test]
+    #[allow(clippy::byte_char_slices)]
     fn test_byte_array_from() {
         assert_eq!(
             ByteArray::from(vec![b'A', b'B', b'C']).data(),
