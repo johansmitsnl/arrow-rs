@@ -425,6 +425,33 @@ pub mod tests {
     }
 
     #[test]
+    fn test_null_null() {
+        let array1 = Int32Array::from(vec![None, Some(1)]);
+        let array2 = Int32Array::from(vec![None, Some(1)]);
+
+        // default sort options
+        let opts = SortOptions::default();
+        let cmp = make_comparator(&array1, &array2, opts.clone()).unwrap();
+        assert_eq!(Ordering::Equal, cmp(0, 0)); // null, null
+        assert_eq!(Ordering::Less, cmp(0, 1)); // null, non-null
+        assert_eq!(Ordering::Greater, cmp(1, 0)); // non-null, null
+
+        // inverse null ordering
+        let cmp = make_comparator(
+            &array1,
+            &array2,
+            SortOptions {
+                nulls_first: !opts.nulls_first,
+                ..opts
+            },
+        )
+        .unwrap();
+        assert_eq!(Ordering::Equal, cmp(0, 0)); // null, null
+        assert_eq!(Ordering::Greater, cmp(0, 1)); // null, non-null
+        assert_eq!(Ordering::Less, cmp(1, 0)); // non-null, null
+    }
+
+    #[test]
     fn test_i32() {
         let array = Int32Array::from(vec![1, 2]);
 
