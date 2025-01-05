@@ -623,6 +623,7 @@ impl<'a, T: ByteViewType + ?Sized> ArrayAccessor for &'a GenericByteViewArray<T>
     }
 }
 
+/// This does the into_iter() for &'a GenericByteViewArray
 impl<'a, T: ByteViewType + ?Sized> IntoIterator for &'a GenericByteViewArray<T> {
     type Item = Option<&'a T::Native>;
     type IntoIter = ArrayIter<Self>;

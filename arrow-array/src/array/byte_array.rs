@@ -544,6 +544,7 @@ impl<T: ByteArrayType> From<GenericByteArray<T>> for ArrayData {
     }
 }
 
+/// This does the into_iter() for &'a GenericByteArray
 impl<'a, T: ByteArrayType> IntoIterator for &'a GenericByteArray<T> {
     type Item = Option<&'a T::Native>;
     type IntoIter = ArrayIter<Self>;

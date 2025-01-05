@@ -1248,4 +1248,29 @@ mod tests {
         let expected: Int32Array = vec![1, 2, 3].into_iter().map(Some).collect();
         assert_eq!(array, expected);
     }
+
+    use crate::builder::{BinaryViewBuilder, FixedSizeBinaryBuilder};
+    use crate::ArrayAccessor;
+
+    fn use_binary_array<'a>(array: impl ArrayAccessor<Item = &'a [u8]>) {
+        // Have to manually iterate over the array
+        for i in 0..array.len() {
+            dbg!(String::from_utf8(array.value(i).to_vec()).unwrap());
+        }
+    }
+
+    #[test]
+    fn binary_array() {
+        let mut builder = BinaryViewBuilder::new();
+        builder.append_value(b"foo");
+        builder.append_value(b"bar");
+        builder.append_value(b"baz");
+        use_binary_array(&builder.finish());
+
+        let mut builder = FixedSizeBinaryBuilder::new(3);
+        builder.append_value(b"foo").unwrap();
+        builder.append_value(b"bar").unwrap();
+        builder.append_value(b"baz").unwrap();
+        use_binary_array(&builder.finish());
+    }
 }

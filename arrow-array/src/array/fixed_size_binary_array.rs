@@ -648,6 +648,7 @@ impl<'a> ArrayAccessor for &'a FixedSizeBinaryArray {
     }
 }
 
+/// This does the into_iter() for &'a FixedSizeBinaryArray
 impl<'a> IntoIterator for &'a FixedSizeBinaryArray {
     type Item = Option<&'a [u8]>;
     type IntoIter = FixedSizeBinaryIter<'a>;
