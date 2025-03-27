@@ -765,9 +765,8 @@ where
                             self.batch_size,
                         )
                         .await
-                        .map_err(|err| {
+                        .inspect_err(|_| {
                             self.state = StreamState::Error;
-                            err
                         })?;
                     self.reader = Some(reader_factory);
 
